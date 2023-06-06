@@ -3,37 +3,37 @@
 #include <cstdlib>
 using namespace std;
 
-struct Point
-{
+struct Point {
     double x, y;
 };
 
-void buildCompleteGraph(const Point* points, int N, double** graph)
+class MGraph
 {
-    for (int i = 0; i < N; i++)
+    double** weigths;
+    int vernum; 
+    bool oriented;
+public:
+    MGraph(int _vernum): vernum(_vernum)
     {
-        for (int j = 0; j < N; j++)
+        //some code
+    }
+
+    void buildCompleteGraph()
+    {
+        for (int i = 0; i < vernum; i++)
         {
-            if (i == j)
+            for (int j = 0; i < vernum; j++)
             {
-                graph[i][j] = 0;
-            }
-            else
-            {
-                graph[i][j] = sqrt(pow(points[i].x - points[j].x, 2));
+
             }
         }
     }
-}
+};
 
 int main()
 {
-    const int N = 15, K = 5;
-    Point points[N];
+    int N = 15, K = 5;
+    MGraph graph(N);
 
-    for (int i = 0; i < N; i++)
-    {
-        cin >> points[i].x >> points[i].x;
-    }
-    cout << "teest";
+    cout << "test";
 }
