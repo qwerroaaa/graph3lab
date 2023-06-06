@@ -8,7 +8,7 @@ struct Point
     double x, y;
 };
 
-void buildCompleteGraph(const Point* Point, int N, double** graph)
+void buildCompleteGraph(const Point* points, int N, double** graph)
 {
     for (int i = 0; i < N; i++)
     {
@@ -20,7 +20,7 @@ void buildCompleteGraph(const Point* Point, int N, double** graph)
             }
             else
             {
-                graph[i][j] = sqrt(pow(Point[i].x - Point[j].x, 2));
+                graph[i][j] = sqrt(pow(points[i].x - points[j].x, 2));
             }
         }
     }
@@ -35,4 +35,5 @@ int main()
     {
         cin >> points[i].x >> points[i].x;
     }
+    cout << "teest";
 }
