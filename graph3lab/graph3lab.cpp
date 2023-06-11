@@ -11,8 +11,8 @@ struct Point {
     Point(double _x, double _y) : x(_x), y(_y) {}
     Point()
     {
-        x = 1 + rand() % 100;
-        y = 1 + rand() % 100;
+        x = rand()%100 + 1;
+        y = rand()%100 + 1;
     }
     static double distance(const Point p1, const Point p2)
     {
@@ -25,6 +25,10 @@ struct Edge
     int u, v;
     double weight;
     Edge(int _u, int _v, double _weight) : u(_u), v(_v), weight(_weight) {}
+    bool operator<(const Edge& other) const {
+        return weight < other.weight;
+    }
+
 };
 
 class MGraph
@@ -32,8 +36,9 @@ class MGraph
     double** weights;
     int vernum; //вершины
     vector<Point> vertexes;
+    int comptotal;
 public:
-    MGraph(int _vernum): vernum(_vernum)
+    MGraph(int _vernum): vernum(_vernum), comptotal(0)
     {
         for (int i = 0; i < vernum; i++)
         {
@@ -53,7 +58,7 @@ public:
     {
         for (int i = 0; i < vernum; i++)
         {
-            for (int j = 0; i < vernum; j++)
+            for (int j = 0; j < vernum; j++)
             {
                 weights[i][j] = Point::distance(vertexes[i], vertexes[j]);
             }
@@ -89,11 +94,37 @@ public:
         }
         return EdgesOfTree;
     }
+
+   
+
+
+    Point getVertex(int index)
+    {
+        return vertexes[index];
+    }
 };
+
+void search(int vertex, int* parent, vector<int>* components, int current_component, bool** adj, int N) {
+    // устанавливает номер текущей компоненте связанной вершине
+    parent[vertex] = current_component;
+    // считаем количество вершин в компонентах
+    components[current_component - 1].push_back(vertex);
+
+    // ищем соседов 
+    for (int i = 0; i < N; i++)
+    {
+        //int neighbor = adj[vertex][i];
+        if (parent[i] == 0 && adj[vertex][i]) {
+            search(i, parent, components, current_component, adj, N);
+        }
+    }
+}
 
 int main()
 {
-    int N = 15, K = 5;
+    srand(time(NULL));
+    setlocale(LC_ALL, "Russian");
+    int N = 6, K = 5;
     MGraph graph(N);
     graph.buildCompleteGraph();
 
@@ -109,5 +140,69 @@ int main()
         {
             adj[i][j] = 0;
         }
+    }
+    
+
+    for (int i = 0; i < N - K; i++)
+    {
+        adj[OstovGraph[i].u][OstovGraph[i].v] = 1;
+        adj[OstovGraph[i].v][OstovGraph[i].u] = 1;
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+        for (int j= 0; j < N; j++)
+        {
+            cout << adj[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    vector<int>* components = new vector<int>[K];
+    int num_components = 0;
+
+    // P отображает номера компонент
+    int* parent = new int[N];
+    for (int i = 0; i < N; i++) {
+        parent[i] = 0;
+    }
+
+    // ищим новые компоненты
+    for (int i = 0; i < N; i++) {
+        if (parent[i] == 0) {
+            num_components++;// нашли новую компоненту
+            search(i, parent, components, num_components, adj, N);
+        }
+    }
+
+
+    for (int component = 0; component < K; component++)
+    {
+        double sumX = 0;
+        double sumY = 0;
+        double minX = INF;
+        double minY = INF;
+        double maxX = 0;
+        double maxY = 0;
+        int size = components[component].size();
+        cout << "Компонента: " << component << "\nВключает в себя: " << size << " Вершин" << endl;
+        for (int i = 0; i < size; i++)
+        {
+                Point currentPoint = graph.getVertex(components[component][i]);
+                sumX += currentPoint.x;
+                sumY += currentPoint.y;
+                minX = min(minX, currentPoint.x);
+                minY = min(minY, currentPoint.y);
+                maxX = max(maxX, currentPoint.x);
+                maxY = max(maxY, currentPoint.y);
+               
+        }
+        double centroidX = sumX / size;
+        double centroidY = sumY / size;
+
+        cout << "Минимальные значения координат: " << minX << ", " << minY << "\n";
+        cout << "Максимальные значения координат: " << maxX << ", " << maxY << "\n";
+        cout << "Координаты центроиды: " << centroidX << ", " << centroidY << "\n";
+        cout << "\n";
     }
 }
