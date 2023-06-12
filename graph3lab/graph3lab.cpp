@@ -49,7 +49,7 @@ public:
         for (int i = 0; i < vernum; i++) {
             weights[i] = new double[vernum];
             for (int j = 0; j < vernum; j++) {
-                weights[i][j] = INF; // Инициализируем все веса нулями
+                weights[i][j] = INF;
             }
         }
     }
@@ -73,26 +73,27 @@ public:
     //алгоритм примо
     vector<Edge> getSpanTree() {
         vector<Edge> EdgesOfTree;
-        double wmin;
-        int i, j, vm, * B = new int[vernum];
-        B[0] = -1;
+        double wmin; //переменная для минимального веса ребра
+        int i, j, vm, * B = new int[vernum]; //массив B для снижения трудоемкости
+        B[0] = -1; //вершина уже включена в ребро
         for (i = 1; i < vernum; i++) B[i] = 0;
         for (i = 1; i < vernum; i++) {
             wmin = INF; vm = 0;
             for (j = 1; j < vernum; j++)
                 if (B[j] != -1 && wmin > weights[j][B[j]])
                 {
-                    vm = j; wmin = weights[j][B[j]];
+                    vm = j; wmin = weights[j][B[j]]; //поиск минимального ребра среди непосещенных
                 }
-            if (!vm) return EdgesOfTree;
+            if (!vm) return EdgesOfTree; //возвращения пустого вектора //если vm = 0, то нет следующей вершины для включения в остовное дерево
             add_edge(vm, B[vm]);
-            EdgesOfTree.push_back(Edge(vm, B[vm], weights[vm][B[vm]]));
-            B[vm] = -1;
+            EdgesOfTree.push_back(Edge(vm, B[vm], weights[vm][B[vm]])); //ребро между vm and B with weights
+            B[vm] = -1; //помечаем, что прошли
             for (j = 1; j < vernum; j++)
-                if (B[j] != -1 && weights[j][B[j]] > weights[j][vm])
-                    B[j] = vm;
+                if (B[j] != -1 && weights[j][B[j]] > weights[j][vm]) //определяем не является ли вершина вершина vm близжайщей соседней к j
+                    B[j] = vm; //если 𝑖 – ближайшая к  𝑗 уже включенная в остов вершина.
+
         }
-        return EdgesOfTree;
+        return EdgesOfTree; //возвращаем остовной граф
     }
 
    
@@ -104,18 +105,17 @@ public:
     }
 };
 
-void search(int vertex, int* parent, vector<int>* components, int current_component, bool** adj, int N) {
-    // устанавливает номер текущей компоненте связанной вершине
-    parent[vertex] = current_component;
+void dfs(int vertex, int* visited, vector<int>* components, int current_component, bool** adj, int N) {
+    // устанавливает номер текущей компоненте связанной вершине, если 1, то посетили, если 0, то нет
+    visited[vertex] = 1;
     // считаем количество вершин в компонентах
     components[current_component - 1].push_back(vertex);
 
-    // ищем соседов 
+    // ищем соседей
     for (int i = 0; i < N; i++)
     {
-        //int neighbor = adj[vertex][i];
-        if (parent[i] == 0 && adj[vertex][i]) {
-            search(i, parent, components, current_component, adj, N);
+        if (visited[i] == 0 && adj[vertex][i]) { //прошли ли мы i и есть ли ребро vertex i
+            dfs(i, visited, components, current_component, adj, N);
         }
     }
 }
@@ -124,7 +124,7 @@ int main()
 {
     srand(time(NULL));
     setlocale(LC_ALL, "Russian");
-    int N = 6, K = 5;
+    int N = 40, K = 8;
     MGraph graph(N);
     graph.buildCompleteGraph();
 
@@ -143,35 +143,26 @@ int main()
     }
     
 
-    for (int i = 0; i < N - K; i++)
+    for (int i = 0; i < N - K; i++) //строим смежную матрицу по N-K ребрам
     {
         adj[OstovGraph[i].u][OstovGraph[i].v] = 1;
         adj[OstovGraph[i].v][OstovGraph[i].u] = 1;
     }
 
-    for (int i = 0; i < N; i++)
-    {
-        for (int j= 0; j < N; j++)
-        {
-            cout << adj[i][j] << " ";
-        }
-        cout << endl;
-    }
-
     vector<int>* components = new vector<int>[K];
     int num_components = 0;
 
-    // P отображает номера компонент
-    int* parent = new int[N];
+    // visited отображает номера компонент
+    int* visited = new int[N];
     for (int i = 0; i < N; i++) {
-        parent[i] = 0;
+        visited[i] = 0;
     }
-
+     
     // ищим новые компоненты
     for (int i = 0; i < N; i++) {
-        if (parent[i] == 0) {
+        if (visited[i] == 0) {
             num_components++;// нашли новую компоненту
-            search(i, parent, components, num_components, adj, N);
+            dfs(i, visited, components, num_components, adj, N);
         }
     }
 
@@ -200,9 +191,9 @@ int main()
         double centroidX = sumX / size;
         double centroidY = sumY / size;
 
-        cout << "Минимальные значения координат: " << minX << ", " << minY << "\n";
-        cout << "Максимальные значения координат: " << maxX << ", " << maxY << "\n";
-        cout << "Координаты центроиды: " << centroidX << ", " << centroidY << "\n";
+        cout << "Минимальные значения координат: (" << minX << ", " << minY << ")\n";
+        cout << "Максимальные значения координат: (" << maxX << ", " << maxY << ")\n";
+        cout << "Координаты центроиды: (" << centroidX << ", " << centroidY << ")\n";
         cout << "\n";
     }
 }
